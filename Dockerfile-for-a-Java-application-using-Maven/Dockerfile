@@ -3,23 +3,20 @@ FROM maven:3.9-eclipse-temurin-17 AS build
 
 WORKDIR /app
 
-# Copy Maven project files
-COPY pom.xml .
-COPY src ./src
+# Copy all project files from the current directory
+COPY . .
 
-# Build the JAR file
-RUN mvn clean package -DskipTests
+# Build the JAR using the repository's Pom.xml file
+RUN mvn -f Pom.xml clean package -DskipTests
 
 # Runtime stage
 FROM eclipse-temurin:17-jre
 
 WORKDIR /app
 
-# Copy the built JAR from the build stage
+# Copy the generated JAR file
 COPY --from=build /app/target/*.jar app.jar
 
-# Spring Boot application port
 EXPOSE 8080
 
-# Start the application
 CMD ["java", "-jar", "app.jar"]
